@@ -1,0 +1,6 @@
+transformers
+torch
+Pillow
+tk
+langchain
+langchain-huggingface
