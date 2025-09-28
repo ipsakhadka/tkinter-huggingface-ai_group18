@@ -186,3 +186,7 @@ Explanation of OOP Concepts in This Project
 
         except Exception as e:
             self.output_text.insert(tk.END, f"Error running model: {str(e)}")
+            
+if __name__ == "__main__":
+    app = AIApp()   # create the GUI object
+    app.mainloop()  # start the event loop
