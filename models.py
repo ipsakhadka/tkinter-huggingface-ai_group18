@@ -43,3 +43,41 @@ class AIModels:
            
        return output #return after the loop
     
+
+    
+# Testing methods
+""" if __name__ == "__main__": 
+    models = AIModels()
+
+    # --- Test Summarization ---
+    text = "Tesing if this is functioning as it should, though manually. This is initial phase so shouldn't be a problem. Is manual test that bad? I guess, we'll figure as we go. Let's see!"
+    print("---- Summarization Test ----")
+    print(models.run_summarization(text))
+    
+    # --- Test Sentiment Analysis ---
+    print("\n---- Sentiment Test ----")
+    print(models.run_sentiment(text))
+
+    # --- Test Image Classification ---
+    print("\n---- Image Classification Test ----")
+    image_path = "cat.jpg"  
+    print(models.run_image_classification(image_path))
+
+    """
+# output of the above test for reference only:
+"""
+---- Summarization Test ----
+This is initial phase so shouldn't be a problem. Is manual test that bad? I guess, we'll figure as we go. Let's see!
+
+---- Sentiment Test ----
+NEGATIVE (Confidence: 0.91)
+
+---- Image Classification Test ----
+Top Predictions:
+1 tabby, tabby cat (Confidence: 0.85)
+2 tiger cat (Confidence: 0.09)
+3 Egyptian cat (Confidence: 0.05)
+4 Persian cat (Confidence: 0.01)
+5 lynx, catamount (Confidence: 0.00)
+
+"""
