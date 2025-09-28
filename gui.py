@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import ttk, scrolledtext
+from tkinter import filedialog 
 from models import AIModels
 
 # This is our main GUI class. It makes the window and connects everything.
@@ -53,32 +54,101 @@ class AIApp(tk.Tk):
             run_frame,
             textvariable=self.model_var,
             state="readonly",
-            values=["Summarization", "Sentiment Analysis"]
+            values=["Summarization", "Sentiment Analysis", "Image Classification"]
         )
         self.model_dropdown.pack(pady=5)
 
-        # Input Text Area (for text input only) 
-        input_label = tk.Label(run_frame, text="Enter your text:", font=("Arial", 12))
-        input_label.pack(pady=5)
-        self.input_text = scrolledtext.ScrolledText(
-            run_frame, wrap=tk.WORD, width=90, height=8, font=("Arial", 11)
+        # Confirm Button
+        confirm_button = tk.Button(
+            run_frame, text="Confirm Selection", font=("Arial", 12, "bold"),
+            bg="#28a745", fg="white", command=self.confirm_selection
         )
-        self.input_text.pack(pady=5)
 
-        # Run Button 
-        run_button = tk.Button(
-            run_frame, text="Run Model", font=("Arial", 12, "bold"),
-            command=self.run_model, bg="#007acc", fg="white", relief="raised"
-        )
-        run_button.pack(pady=10)
+        confirm_button.pack(pady=10)
 
-        # Output Area 
-        output_label = tk.Label(run_frame, text="Model Output:", font=("Arial", 12))
-        output_label.pack(pady=5)
+        # Save the run_frame so confirm_selection can add widgets later
+        self.run_tab = run_frame
+
+    # ======================
+    # CONFIRM SELECTION (between text and image)
+    # ======================
+    def confirm_selection(self):
+        # Clear previous widgets if they exist
+        if hasattr(self, 'input_label'): self.input_label.destroy()
+        if hasattr(self, 'input_text'): self.input_text.destroy()
+        if hasattr(self, 'upload_button'): self.upload_button.destroy()
+        if hasattr(self, 'run_button'): self.run_button.destroy()
+        if hasattr(self, 'output_label'): self.output_label.destroy()
+        if hasattr(self, 'output_text'): self.output_text.destroy()
+
+        input_type = self.input_type_var.get()
+
+        # For text input
+        if input_type == "Text":
+            self.input_label = tk.Label(self.run_tab, text="Enter your text:", font=("Arial", 12))
+            self.input_label.pack(pady=5)
+
+            self.input_text = scrolledtext.ScrolledText(
+                self.run_tab, wrap=tk.WORD, width=90, height=8, font=("Arial", 11)
+            )
+            self.input_text.pack(pady=5)
+
+            self.run_button = tk.Button(
+                self.run_tab, text="Run Model", font=("Arial", 12, "bold"),
+                bg="#007acc", fg="white", command=self.run_model
+            )
+            self.run_button.pack(pady=10)
+
+        # For image input
+        elif input_type == "Image":
+            self.upload_button = tk.Button(
+                self.run_tab, text="Upload Image & Run", font=("Arial", 12, "bold"),
+                bg="#007acc", fg="white", command=self.run_model
+            )
+            self.upload_button.pack(pady=5)
+
+        # Output Area (common to all)
+        self.output_label = tk.Label(self.run_tab, text="Model Output:", font=("Arial", 12))
+        self.output_label.pack(pady=5)
+
         self.output_text = scrolledtext.ScrolledText(
-            run_frame, wrap=tk.WORD, width=90, height=10, font=("Arial", 11)
+            self.run_tab, wrap=tk.WORD, width=90, height=10, font=("Arial", 11)
         )
         self.output_text.pack(pady=5)
+
+        
+## this shows confirm button and is functional, but when double clicked it shows multiple times, 
+## required update here would be: to fix the button (right now, it's transparent and need to be clicked see the text)
+## also, should click only once and then perform action or refresh. 
+        
+
+
+
+        ## commenting the following section, since we're not using text only
+
+
+        # # Input Text Area (for text input only) 
+        # input_label = tk.Label(run_frame, text="Enter your text:", font=("Arial", 12))
+        # input_label.pack(pady=5)
+        # self.input_text = scrolledtext.ScrolledText(
+        #     run_frame, wrap=tk.WORD, width=90, height=8, font=("Arial", 11)
+        # )
+        # self.input_text.pack(pady=5)
+
+        # # Run Button 
+        # run_button = tk.Button(
+        #     run_frame, text="Run Model", font=("Arial", 12, "bold"),
+        #     command=self.run_model, bg="#007acc", fg="white", relief="raised"
+        # )
+        # run_button.pack(pady=10)
+
+        # # Output Area 
+        # output_label = tk.Label(run_frame, text="Model Output:", font=("Arial", 12))
+        # output_label.pack(pady=5)
+        # self.output_text = scrolledtext.ScrolledText(
+        #     run_frame, wrap=tk.WORD, width=90, height=10, font=("Arial", 11)
+        # )
+        # self.output_text.pack(pady=5)
 
     # ======================
     # TAB 2: Model Information
@@ -107,6 +177,12 @@ Model Information
    - Task: Checks if text is Positive or Negative
    - Strength: Fast and accurate
    - Weakness: Only knows 2 moods (positive/negative)
+
+3) Image Classification Model: google/vit-base-patch16-224
+   - Type: Vision Transformer (ViT)
+   - Task: Classifies images into categories (e.g., animals, objects)
+   - Strength: General-purpose, can recognize a wide range of images
+   - Weakness: Might misclassify uncommon objects or very small details
 """
         info_text.insert(tk.END, model_info)
         info_text.config(state="disabled")  # lock text
@@ -165,6 +241,22 @@ Explanation of OOP Concepts in This Project
                 self.output_text.delete("1.0", tk.END)
                 self.output_text.insert(tk.END, "Please enter some text first!")
                 return
+        #adding the image input type
+        elif input_type == "Image":
+            image_path = filedialog.askopenfilename(
+                title = "Select an image",
+                filetypes = [("Image files", "*.jpg *.jpeg *.png *bmp *.gif")]
+            )
+            if not image_path:
+                self.output_text.deleted ("1.0", tk.END)
+                self.output_text.insert(tk.END, "No image selected!")
+                return   
+            # Run the image classifier
+            result = self.models.run_image_classification(image_path)
+            self.output_text.delete("1.0", tk.END)
+            self.output_text.insert(tk.END, result)
+            return  # exit function after running image classifier     
+        
         else:
             # Placeholder for Image/Audio (not implemented yet)
             self.output_text.delete("1.0", tk.END)
@@ -186,7 +278,7 @@ Explanation of OOP Concepts in This Project
 
         except Exception as e:
             self.output_text.insert(tk.END, f"Error running model: {str(e)}")
-            
+
 if __name__ == "__main__":
     app = AIApp()   # create the GUI object
     app.mainloop()  # start the event loop
