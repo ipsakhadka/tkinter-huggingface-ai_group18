@@ -31,27 +31,30 @@ class AIApp(tk.Tk):
     # ======================
     def create_run_tab(self):
         # Frame for tab
-        run_frame = ttk.Frame(self.notebook)
-        self.notebook.add(run_frame, text="Run Models")
+        self.run_tab = ttk.Frame(self.notebook)
+        self.notebook.add(self.run_tab, text="Run Models")
 
         # Input Type Selection 
-        input_type_label = tk.Label(run_frame, text="Select Input Type:", font=("Arial", 12))
+        input_type_label = tk.Label(self.run_tab, text="Choose input type:", font=("Arial", 12))
         input_type_label.pack(pady=5)
-        self.input_type_var = tk.StringVar(value="Text")  # (default)
+
+        self.input_type_var = tk.StringVar(value="Text")
         self.input_type_dropdown = ttk.Combobox(
-            run_frame,
+            self.run_tab,
             textvariable=self.input_type_var,
             state="readonly",
-            values=["Text", "Image", "Audio"]  # (only text works now)
+            values=["Text", "Image"]
         )
         self.input_type_dropdown.pack(pady=5)
 
+
         # Model Selection 
-        model_label = tk.Label(run_frame, text="Choose a model:", font=("Arial", 12))
+        model_label = tk.Label(self.run_tab, text="Choose a model:", font=("Arial", 12))
         model_label.pack(pady=5)
-        self.model_var = tk.StringVar(value="Summarization")  # (default)
+
+        self.model_var = tk.StringVar(value="Summarization") 
         self.model_dropdown = ttk.Combobox(
-            run_frame,
+            self.run_tab,
             textvariable=self.model_var,
             state="readonly",
             values=["Summarization", "Sentiment Analysis", "Image Classification"]
@@ -59,96 +62,145 @@ class AIApp(tk.Tk):
         self.model_dropdown.pack(pady=5)
 
         # Confirm Button
-        confirm_button = tk.Button(
-            run_frame, text="Submit", font=("Arial", 12, "bold"),
+        self.confirm_button = tk.Button(
+            self.run_tab, text="Submit", font=("Arial", 12, "bold"),
             bg="white", fg="blue", command=self.confirm_selection
         )
 
-        confirm_button.pack(pady=10)
+        self.confirm_button.pack(pady=10)
 
-        # Save the run_frame so confirm_selection can add widgets later
-        self.run_tab = run_frame
+         # ==== Refresh Button ====
+        self.refresh_button = tk.Button(
+            self.run_tab, text="Refresh", font=("Arial", 12, "bold"),
+            bg="White", fg="green", command=self.refresh_selection
+        )
+        self.refresh_button.pack(pady=5)
+
+        # Frame for input/output widgets
+        self.io_frame = tk.Frame(self.run_tab)
+        self.io_frame.pack(fill="both", expand=True, pady=10)
 
     # ======================
     # CONFIRM SELECTION (between text and image)
     # ======================
+
     def confirm_selection(self):
-        # Clear previous widgets if they exist
-        if hasattr(self, 'input_label'): self.input_label.destroy()
-        if hasattr(self, 'input_text'): self.input_text.destroy()
-        if hasattr(self, 'upload_button'): self.upload_button.destroy()
-        if hasattr(self, 'run_button'): self.run_button.destroy()
-        if hasattr(self, 'output_label'): self.output_label.destroy()
-        if hasattr(self, 'output_text'): self.output_text.destroy()
 
-        input_type = self.input_type_var.get()
+        #  Clear previous input/output but keep dropdowns and submit button
+        for widget in self.io_frame.winfo_children():
+            widget.destroy()
+        
+        input_type = self.input_var.get()
+        model_type = self.model_var.get()
 
-        # For text input
-        if input_type == "Text":
-            self.input_label = tk.Label(self.run_tab, text="Enter your text:", font=("Arial", 12))
-            self.input_label.pack(pady=5)
 
-            self.input_text = scrolledtext.ScrolledText(
-                self.run_tab, wrap=tk.WORD, width=90, height=8, font=("Arial", 11)
-            )
-            self.input_text.pack(pady=5)
+        # Check invalid combinations
+        if input_type == "Text" and model_type == "Image Classification":
+            tk.Label(self.io_frame, text="Invalid selection: Text + Image Classification", fg="red").pack()
+            return
+        if input_type == "Image" and model_type in ["Sentiment Analysis"]:
+            tk.Label(self.io_frame, text="Invalid selection: Image + " + model_type, fg="red").pack()
+            return
 
-            self.run_button = tk.Button(
-                self.run_tab, text="Run Model", font=("Arial", 12, "bold"),
-                bg="#007acc", fg="white", command=self.run_model
-            )
-            self.run_button.pack(pady=10)
+        # Text + Summarization or Sentiment
+        if input_type == "Text" and model_type in ["Summarization", "Sentiment Analysis"]:
+            tk.Label(self.io_frame, text="Enter your text:", font=("Arial", 12)).pack(pady=5)
+            self.text_input = tk.Text(self.io_frame, height=6, width=60)
+            self.text_input.pack(pady=5)
 
-        # For image input
-        elif input_type == "Image":
-            self.upload_button = tk.Button(
-                self.run_tab, text="Upload Image & Run", font=("Arial", 12, "bold"),
-                bg="#007acc", fg="white", command=self.run_model
-            )
-            self.upload_button.pack(pady=5)
+            tk.Button(
+                self.io_frame, text="Run", font=("Arial", 12, "bold"),
+                bg="white", fg="green",
+                command=lambda: self.run_text_model(model_type)
+            ).pack(pady=10)
 
-        # Output Area (common to all)
-        self.output_label = tk.Label(self.run_tab, text="Model Output:", font=("Arial", 12))
-        self.output_label.pack(pady=5)
+            tk.Label(self.io_frame, text="Model Output:", font=("Arial", 12, "bold")).pack(pady=5)
+            self.output_text = tk.Text(self.io_frame, height=6, width=60, state="disabled")
+            self.output_text.pack(pady=5)
 
-        self.output_text = scrolledtext.ScrolledText(
-            self.run_tab, wrap=tk.WORD, width=90, height=10, font=("Arial", 11)
-        )
-        self.output_text.pack(pady=5)
+        # Image + Image Classification or Summarization
+        elif input_type == "Image" and model_type in ["Image Classification", "Summarization"]:
+            tk.Button(
+                self.io_frame, text="Upload Image", font=("Arial", 12, "bold"),
+                bg="white", fg="blue", command=self.upload_image
+            ).pack(pady=5)
+
+            tk.Button(
+                self.io_frame, text="Run", font=("Arial", 12, "bold"),
+                bg="white", fg="green",
+                command=lambda: self.run_image_model(model_type)
+            ).pack(pady=10)
+
+            tk.Label(self.io_frame, text="Model Output:", font=("Arial", 12, "bold")).pack(pady=5)
+            self.output_text = tk.Text(self.io_frame, height=6, width=60, state="disabled")
+            self.output_text.pack(pady=5)
+
+
 
         
 ## this shows confirm button and is functional, but when double clicked it shows multiple times, 
 ## required update here would be: to fix the button (right now, it's transparent and need to be clicked see the text)
 ## also, should click only once and then perform action or refresh. 
         
+    def run_text_model(self, selected_model):
+        text = self.input_text.get("1.0", tk.END).strip()
+        self.output_text.delete("1.0", tk.END)
+
+        if not text:
+            self.output_text.insert(tk.END, "Please enter some text first!")
+            return
+
+        try:
+            if selected_model == "Summarization":
+                result = self.models.run_summarization(text)
+                self.output_text.insert(tk.END, "Summary:\n" + result)
+
+            elif selected_model == "Sentiment Analysis":
+                result = self.models.run_sentiment(text)
+                self.output_text.insert(tk.END, "Sentiment: " + result)
+
+        except Exception as e:
+            self.output_text.insert(tk.END, f"Error: {str(e)}")
+
+
+    def upload_image(self):
+        self.image_path = filedialog.askopenfilename(
+            title="Select an image",
+            filetypes=[("Image files", "*.jpg *.jpeg *.png *.bmp *.gif")]
+        )
+        if not self.image_path:
+            self.output_text.delete("1.0", tk.END)
+            self.output_text.insert(tk.END, "No image selected!")
+        else:
+            self.output_text.delete("1.0", tk.END)
+            self.output_text.insert(tk.END, f"Image selected: {self.image_path}")
+
+
+    def run_image_model(self, selected_model):
+        self.output_text.delete("1.0", tk.END)
+
+        if not hasattr(self, "image_path") or not self.image_path:
+            self.output_text.insert(tk.END, "Please upload an image first!")
+            return
+
+        try:
+            if selected_model == "Image Classification":
+                result = self.models.run_image_classification(self.image_path)
+                self.output_text.insert(tk.END, "Classification:\n" + result)
+
+            elif selected_model == "Summarization":
+                # Example: OCR -> Summarization (placeholder)
+                extracted_text = self.models.run_ocr(self.image_path)  
+                result = self.models.run_summarization(extracted_text)
+                self.output_text.insert(tk.END, "Summary:\n" + result)
+
+        except Exception as e:
+            self.output_text.insert(tk.END, f"Error: {str(e)}")
 
 
 
-        ## commenting the following section, since we're not using text only
 
-
-        # # Input Text Area (for text input only) 
-        # input_label = tk.Label(run_frame, text="Enter your text:", font=("Arial", 12))
-        # input_label.pack(pady=5)
-        # self.input_text = scrolledtext.ScrolledText(
-        #     run_frame, wrap=tk.WORD, width=90, height=8, font=("Arial", 11)
-        # )
-        # self.input_text.pack(pady=5)
-
-        # # Run Button 
-        # run_button = tk.Button(
-        #     run_frame, text="Run Model", font=("Arial", 12, "bold"),
-        #     command=self.run_model, bg="#007acc", fg="white", relief="raised"
-        # )
-        # run_button.pack(pady=10)
-
-        # # Output Area 
-        # output_label = tk.Label(run_frame, text="Model Output:", font=("Arial", 12))
-        # output_label.pack(pady=5)
-        # self.output_text = scrolledtext.ScrolledText(
-        #     run_frame, wrap=tk.WORD, width=90, height=10, font=("Arial", 11)
-        # )
-        # self.output_text.pack(pady=5)
+       
 
     # ======================
     # TAB 2: Model Information
@@ -278,6 +330,17 @@ Explanation of OOP Concepts in This Project
 
         except Exception as e:
             self.output_text.insert(tk.END, f"Error running model: {str(e)}")
+
+    def refresh_selection(self):
+        """Reset the Run tab to allow new selections"""
+        # Clear input/output frame
+        for widget in self.io_frame.winfo_children():
+            widget.destroy()
+
+        # Reset dropdowns back to defaults
+        self.input_var.set("--Select One--")  # clear input type
+        self.model_var.set("--Select One--")  # clear model selection
+
 
 if __name__ == "__main__":
     app = AIApp()   # create the GUI object
