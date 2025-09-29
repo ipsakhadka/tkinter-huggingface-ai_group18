@@ -60,8 +60,8 @@ class AIApp(tk.Tk):
 
         # Confirm Button
         confirm_button = tk.Button(
-            run_frame, text="Confirm Selection", font=("Arial", 12, "bold"),
-            bg="#28a745", fg="white", command=self.confirm_selection
+            run_frame, text="Submit", font=("Arial", 12, "bold"),
+            bg="white", fg="blue", command=self.confirm_selection
         )
 
         confirm_button.pack(pady=10)
