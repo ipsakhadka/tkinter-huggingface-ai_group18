@@ -4,6 +4,16 @@ from tkinter import filedialog, messagebox
 from models import AIModels
 import functools
 
+#Decorator
+
+def log_model_run(func):
+    """Decorator to log when a model is run"""
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        print(f"Running model: {func.__name__}")  # Logging model run
+        return func(*args, **kwargs)
+    return wrapper
+
 # This is our main GUI class. It makes the window and connects everything.
 class AIApp(tk.Tk):
     def __init__(self):
@@ -99,18 +109,18 @@ class AIApp(tk.Tk):
         if input_type == "Text" and model_type == "Image Classification":
             tk.Label(self.io_frame, text="Invalid selection: Text + Image Classification", fg="red").pack()
             return
-        if input_type == "Image" and model_type in ["Sentiment Analysis"]:
+        if input_type == "Image" and model_type == "Sentiment Analysis":
             tk.Label(self.io_frame, text="Invalid selection: Image + " + model_type, fg="red").pack()
             return
 
         # Text + Summarization or Sentiment
-        if input_type == "Text" and model_type in ["Summarization", "Sentiment Analysis"]:
+        if input_type == "Text":
             tk.Label(self.io_frame, text="Enter your text:", font=("Arial", 12)).pack(pady=5)
             self.text_input = tk.Text(self.io_frame, height=6, width=70)
             self.text_input.pack(pady=5)
 
             tk.Button(
-                self.io_frame, text="Run", font=("Arial", 12, "bold"),
+                self.io_frame, text="Submit", font=("Arial", 12, "bold"),
                 bg="white", fg="green",
                 command=lambda: self.run_text_model(model_type)
             ).pack(pady=10)
@@ -118,23 +128,26 @@ class AIApp(tk.Tk):
             tk.Label(self.io_frame, text="Model Output:", font=("Arial", 12, "bold")).pack(pady=5)
             self.output_text = tk.Text(self.io_frame, height=6, width=60, state="disabled")
             self.output_text.pack(pady=5)
+            return
 
-        # Image + Image Classification or Summarization
-        elif input_type == "Image" and model_type in ["Image Classification", "Summarization"]:
+    # Image + Image Classification or Summarization
+
+        elif input_type == "Image":
             tk.Button(
                 self.io_frame, text="Upload Image", font=("Arial", 12, "bold"),
                 bg="white", fg="blue", command=self.upload_image
             ).pack(pady=5)
 
             tk.Button(
-                self.io_frame, text="Run", font=("Arial", 12, "bold"),
-                bg="white", fg="green",
+                self.io_frame, text="Submit", font=("Arial", 12, "bold"),
+                    bg="white", fg="green",
                 command=lambda: self.run_image_model(model_type)
             ).pack(pady=10)
 
             tk.Label(self.io_frame, text="Model Output:", font=("Arial", 12, "bold")).pack(pady=5)
             self.output_text = tk.Text(self.io_frame, height=6, width=60, state="disabled")
             self.output_text.pack(pady=5)
+            return
 
 
 
@@ -142,62 +155,68 @@ class AIApp(tk.Tk):
 ## this shows confirm button and is functional, but when double clicked it shows multiple times, 
 ## required update here would be: to fix the button (right now, it's transparent and need to be clicked see the text)
 ## also, should click only once and then perform action or refresh. 
-        
+
+
+    @log_model_run #decorator added    
     def run_text_model(self, selected_model):
-        text = self.input_text.get("1.0", tk.END).strip()
+        text = self.text_input.get("1.0", tk.END).strip()
+        self.output_text.config(state="normal")
         self.output_text.delete("1.0", tk.END)
 
         if not text:
             self.output_text.insert(tk.END, "Please enter some text first!")
+            self.output_text.config(state="disabled")
             return
 
         try:
             if selected_model == "Summarization":
                 result = self.models.run_summarization(text)
                 self.output_text.insert(tk.END, "Summary:\n" + result)
-
             elif selected_model == "Sentiment Analysis":
                 result = self.models.run_sentiment(text)
                 self.output_text.insert(tk.END, "Sentiment: " + result)
-
         except Exception as e:
             self.output_text.insert(tk.END, f"Error: {str(e)}")
-
-
-    def upload_image(self):
-        self.image_path = filedialog.askopenfilename(
-            title="Select an image",
-            filetypes=[("Image files", "*.jpg *.jpeg *.png *.bmp *.gif")]
-        )
-        if not self.image_path:
-            self.output_text.delete("1.0", tk.END)
-            self.output_text.insert(tk.END, "No image selected!")
-        else:
-            self.output_text.delete("1.0", tk.END)
-            self.output_text.insert(tk.END, f"Image selected: {self.image_path}")
+        finally:
+            self.output_text.config(state="disabled")
 
 
     def run_image_model(self, selected_model):
+        self.output_text.config(state="normal")
         self.output_text.delete("1.0", tk.END)
 
         if not hasattr(self, "image_path") or not self.image_path:
             self.output_text.insert(tk.END, "Please upload an image first!")
+            self.output_text.config(state="disabled")
             return
 
         try:
             if selected_model == "Image Classification":
                 result = self.models.run_image_classification(self.image_path)
                 self.output_text.insert(tk.END, "Classification:\n" + result)
-
             elif selected_model == "Summarization":
-                # Example: OCR -> Summarization (placeholder)
-                extracted_text = self.models.run_ocr(self.image_path)  
+                extracted_text = self.models.run_ocr(self.image_path)
                 result = self.models.run_summarization(extracted_text)
                 self.output_text.insert(tk.END, "Summary:\n" + result)
-
         except Exception as e:
             self.output_text.insert(tk.END, f"Error: {str(e)}")
+        finally:
+            self.output_text.config(state="disabled")
 
+
+    @log_model_run
+    def upload_image(self):
+        self.image_path = filedialog.askopenfilename(
+            title="Select an image",
+            filetypes=[("Image files", "*.jpg *.jpeg *.png *.bmp *.gif")]
+        )
+        self.output_text.config(state="normal")
+        self.output_text.delete("1.0", tk.END)
+        if not self.image_path:
+            self.output_text.insert(tk.END, "No image selected!")
+        else:
+            self.output_text.insert(tk.END, f"Image selected: {self.image_path}")
+        self.output_text.config(state="disabled")
 
 
 
