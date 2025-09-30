@@ -1,7 +1,8 @@
 import tkinter as tk
 from tkinter import ttk, scrolledtext
-from tkinter import filedialog 
+from tkinter import filedialog, messagebox
 from models import AIModels
+import functools
 
 # This is our main GUI class. It makes the window and connects everything.
 class AIApp(tk.Tk):
