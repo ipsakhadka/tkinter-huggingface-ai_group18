@@ -90,7 +90,7 @@ class AIApp(tk.Tk):
         for widget in self.io_frame.winfo_children():
             widget.destroy()
         
-        input_type = self.input_var.get()
+        input_type = self.input_type_var.get()
         model_type = self.model_var.get()
 
 
@@ -288,7 +288,7 @@ Explanation of OOP Concepts in This Project
 
         # If it's text, we use the text box
         if input_type == "Text":
-            text = self.input_text.get("1.0", tk.END).strip()
+            text = self.text_input.get("1.0", tk.END).strip()
             if not text:
                 self.output_text.delete("1.0", tk.END)
                 self.output_text.insert(tk.END, "Please enter some text first!")
@@ -300,7 +300,7 @@ Explanation of OOP Concepts in This Project
                 filetypes = [("Image files", "*.jpg *.jpeg *.png *bmp *.gif")]
             )
             if not image_path:
-                self.output_text.deleted ("1.0", tk.END)
+                self.output_text.delete("1.0", tk.END)
                 self.output_text.insert(tk.END, "No image selected!")
                 return   
             # Run the image classifier
@@ -338,7 +338,7 @@ Explanation of OOP Concepts in This Project
             widget.destroy()
 
         # Reset dropdowns back to defaults
-        self.input_var.set("--Select One--")  # clear input type
+        self.input_type_var.set("--Select One--")  # clear input type
         self.model_var.set("--Select One--")  # clear model selection
 
 
