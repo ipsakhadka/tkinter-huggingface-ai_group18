@@ -144,7 +144,7 @@ class AIApp(tk.Tk):
 ## also, should click only once and then perform action or refresh. 
         
     def run_text_model(self, selected_model):
-        text = self.input_text.get("1.0", tk.END).strip()
+        text = self.text_input.get("1.0", tk.END).strip()
         self.output_text.delete("1.0", tk.END)
 
         if not text:
