@@ -10,7 +10,7 @@ class AIApp(tk.Tk):
         super().__init__()
 
         # Window settings
-        self.title("HIT137 Assignment 3 - Tkinter AI Models GUI")
+        self.title("HIT137 Assignment 3 : Tkinter AI Models GUI")
         self.geometry("800x600")
         self.configure(bg="#f4f4f4")
 
@@ -105,7 +105,7 @@ class AIApp(tk.Tk):
         # Text + Summarization or Sentiment
         if input_type == "Text" and model_type in ["Summarization", "Sentiment Analysis"]:
             tk.Label(self.io_frame, text="Enter your text:", font=("Arial", 12)).pack(pady=5)
-            self.text_input = tk.Text(self.io_frame, height=6, width=60)
+            self.text_input = tk.Text(self.io_frame, height=6, width=70)
             self.text_input.pack(pady=5)
 
             tk.Button(
@@ -338,8 +338,8 @@ Explanation of OOP Concepts in This Project
             widget.destroy()
 
         # Reset dropdowns back to defaults
-        self.input_type_var.set("--Select One--")  # clear input type
-        self.model_var.set("--Select One--")  # clear model selection
+        self.input_type_var.set("Text")  # clear input type
+        self.model_var.set("Summarization")  # clear model selection
 
 
 if __name__ == "__main__":
