@@ -6,8 +6,7 @@ import functools
 
 #Decorator
 
-def log_model_run(func):
-    """Decorator to log when a model is run"""
+def log_model_run(func    """Decorator to log when a model is run"""
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
         print(f"Running model: {func.__name__}")  # Logging model run
