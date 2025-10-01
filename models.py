@@ -34,8 +34,11 @@ class AIModels:
        """
 
        results = self.image_classifier(image_path) # runs image and returns a list of labels and scores
-       output = "Top Predictions:\n"
+       top_result=results[0]                        #this is the highest confidence prediction
+       
+       output = f"Classification: {top_result['label']} (Confidence: {top_result['score']:.2f})\n\n"
 
+       output += "Top Predictions:\n" 
        for i, r in enumerate (results, start=1):
            label = r['label']
            score = r['score']

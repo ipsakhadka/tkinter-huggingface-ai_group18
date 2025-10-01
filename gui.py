@@ -192,7 +192,7 @@ class AIApp(tk.Tk):
         try:
             if selected_model == "Image Classification":
                 result = self.models.run_image_classification(self.image_path)
-                self.output_text.insert(tk.END, "Classification:\n" + result)
+                self.output_text.insert(tk.END, result)
             elif selected_model == "Summarization":
                 extracted_text = self.models.run_ocr(self.image_path)
                 result = self.models.run_summarization(extracted_text)
