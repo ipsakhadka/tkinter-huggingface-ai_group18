@@ -136,6 +136,9 @@ class AIApp(tk.Tk):
 
     # Image + Image Classification or Summarization
 
+    #using normal button, wanted to use modern web file upload like but .. 
+    # Tkinter doesn't have builtu-in widget for it
+
         elif input_type == "Image":
             tk.Button(
                 self.io_frame, text="Upload Image", font=("Arial", 12, "bold"),
