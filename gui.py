@@ -4,7 +4,7 @@ from tkinter import filedialog, messagebox
 from models import AIModels
 import functools
 from PIL import Image, ImageTk
-
+import pytesseract 
 
 #Decorator
 
@@ -145,7 +145,7 @@ class AIApp(tk.Tk):
             ).pack(pady=10)
 
             tk.Label(self.io_frame, text="Model Output:", font=("Arial", 12, "bold")).pack(pady=5)
-            self.output_text = tk.Text(self.io_frame, height=6, width=60, state="disabled")
+            self.output_text = tk.Text(self.io_frame, height=10, width=70, state="disabled")
             self.output_text.pack(pady=5)
             return
 
@@ -202,6 +202,28 @@ class AIApp(tk.Tk):
         finally:
             self.output_text.config(state="disabled")
 
+    #using pytesseract for error from ocr
+    def safe_ocr(self, image_path):
+        """
+        Safely extract text from an image.
+        Converts unsupported images to RGB and catches errors.
+        """
+        try:
+            img = Image.open(image_path)
+            # convert to RGB (required for pytesseract)
+            if img.mode != "RGB":
+                img = img.convert("RGB")  
+            # Remove alpha channel if present
+            if "A" in img.getbands():
+                img = img.convert("RGB")
+            text = pytesseract.image_to_string(img)
+            return text.strip()
+        except Exception as e:
+            return f"OCR failed: Can't Summarize this Image. Please try another.  ({str(e)})"
+        
+            # Returns the extracted text, or an error message if OCR fails.
+
+
 
     def run_image_model(self, selected_model):
         self.output_text.config(state="normal")
@@ -216,12 +238,19 @@ class AIApp(tk.Tk):
             if selected_model == "Image Classification":
                 result = self.models.run_image_classification(self.image_path)
                 self.output_text.insert(tk.END, result)
+
             elif selected_model == "Summarization":
-                extracted_text = self.models.run_ocr(self.image_path)
-                result = self.models.run_summarization(extracted_text)
-                self.output_text.insert(tk.END, "Summary:\n" + result)
+                # Use safe_ocr instead of direct run_ocr
+                extracted_text = self.safe_ocr(self.image_path)
+                if extracted_text.startswith("OCR failed"):
+                    self.output_text.insert(tk.END, extracted_text)
+                else:
+                    result = self.models.run_summarization(extracted_text)
+                    self.output_text.insert(tk.END, "Summary:\n" + result)
+
         except Exception as e:
             self.output_text.insert(tk.END, f"Error: {str(e)}")
+
         finally:
             self.output_text.config(state="disabled")
 
