@@ -1,5 +1,7 @@
 import os
 from transformers import pipeline
+import pytesseract
+from PIL import Image
 
 # # Disable Hugging Face symlink warning on Windows
 # os.environ["HF_HUB_DISABLE_SYMLINKS_WARNING"] = "1"
@@ -46,7 +48,17 @@ class AIModels:
            
        return output #return after the loop
     
-
+    #adding the ocr function to read text from image
+    # this is when we select Image and Summarization combo in the GUI
+    
+    
+    def run_ocr(self, image_path):
+        try:
+            img = Image.open(image_path)
+            text = pytesseract.image_to_string(img)
+            return text
+        except Exception as e:
+            return f"OCR failed: {str(e)}"
     
 # Testing methods
 """ if __name__ == "__main__": 
