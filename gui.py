@@ -289,23 +289,47 @@ class AIApp(tk.Tk):
         model_info = """
 Model Information
 
-1) Summarization Model: facebook/bart-large-cnn
-   - Type: Sequence-to-sequence transformer
-   - Task: Summarizes long text into short text
-   - Strength: Great for articles or reports
-   - Weakness: Can miss small details if text is too long
+1. Text Summarization Model: facebook/bart-large-cnn
 
-2) Sentiment Analysis Model: distilbert-base-uncased-finetuned-sst-2-english
-   - Type: DistilBERT (small, fast version of BERT)
-   - Task: Checks if text is Positive or Negative
-   - Strength: Fast and accurate
-   - Weakness: Only knows 2 moods (positive/negative)
+    Task: Summarizes long text into concise text.
 
-3) Image Classification Model: google/vit-base-patch16-224
-   - Type: Vision Transformer (ViT)
-   - Task: Classifies images into categories (e.g., animals, objects)
-   - Strength: General-purpose, can recognize a wide range of images
-   - Weakness: Might misclassify uncommon objects or very small details
+    Strength: Excellent for articles or reports.
+
+    Limitation: May miss minor details if text is very long.
+
+2. Sentiment Analysis Model: distilbert-base-uncased-finetuned-sst-2-english
+
+    Task: Detects whether text is positive or negative.
+
+    Strength: Fast and accurate for simple sentiment tasks.
+
+    Limitation: Limited to two classes (positive/negative).
+
+3. Image Classification Model: google/vit-base-patch16-224
+
+    Task: Classifies images into categories (e.g., animals, objects).
+
+    Strength: Recognizes a wide variety of images.
+
+    Limitation: Small or unusual objects may be misclassified.
+
+4. Image-to-Text (OCR + Summarization)
+
+    Task: Extracts text from an image and summarizes it.
+
+    Strength: Works for scanned documents, screenshots, or photos with text.
+
+    Limitation: OCR may fail on unsupported formats, low-quality, or noisy images.
+
+5. Extra Features / Enhancements:
+
+    Background image added for visual appeal.
+
+    Styled buttons for better UX.
+
+    Error handling and logging for robust model execution.
+
+    Support for multiple input types (text & image).
 """
         info_text.insert(tk.END, model_info)
         info_text.config(state="disabled")  # lock text
@@ -326,26 +350,57 @@ Model Information
         oop_explanation = """
 Explanation of OOP Concepts in This Project
 
-1) Inheritance:
-   - Our AIApp class gets features from tkinter.Tk.
-   - Means we don’t need to build everything from scratch.
+1. Inheritance
 
-2) Encapsulation:
-   - The models are inside AIModels class in models.py.
-   - The GUI just uses simple functions, doesn’t touch inside code.
+    - The AIApp class inherits from tk.Tk.
 
-3) Polymorphism:
-   - run_model() acts different depending on which model we select.
-   - Same function name, different output.
+    - This allows the GUI class to automatically get all functionality of a Tkinter window (like event loop, widgets, and window management).
 
-4) Method Overriding:
-   - Tkinter has __init__ already.
-   - We override it in AIApp to set up our own GUI stuff.
+     - We only added our custom features like tabs, buttons, and model connections instead of writing the window from scratch.
 
-5) Multiple Files:
-   - models.py = model code
-   - gui.py = GUI code
-   - main.py = starts the program
+2. Encapsulation
+
+    - The AI models are encapsulated inside the AIModels class (in models.py).
+
+    - The GUI interacts with the models only through public methods like run_summarization, run_sentiment, and run_image_classification.
+
+    - This hides the internal details of the models, making the GUI simpler and safer.
+
+3. Polymorphism
+
+    - The run_model function behaves differently depending on the input type (Text or Image) and the selected model (Summarization, Sentiment Analysis, Image Classification, or Image-to-Text).
+
+    - Same function name, but different behavior depending on context.
+
+4. Method Overriding
+
+    - t__ method of tk.Tk is overridden in AIApp to customize the GUI window, add tabs, buttons, input/output frames, and background images.
+
+5. Modularity / Multiple Files
+
+    - The project is split into models.py (AI model logic) and gui.py (GUI code).
+
+    - Keeps responsibilities separated: the GUI handles interaction, and models.py handles AI computations.
+
+6. Error Handling & Logging
+
+    - Try/except blocks are used when running models to catch errors (e.g., unsupported image types, empty text).
+
+    - A logging decorator (log_model_run) is applied to model functions to record each execution.
+
+    - Improves robustness and makes debugging easier.
+
+7. Extra Features / Enhancements
+
+    - Background image added for visual appeal.
+
+    - Styled buttons to improve user experience.
+
+    - Dynamic input/output frames that refresh when changing models or input types.
+
+    - Support for modern web-like file upload for images.
+
+    - Supports image-to-text (OCR + summarization) in addition to standard models.
 """
         explain_text.insert(tk.END, oop_explanation)
         explain_text.config(state="disabled")  # lock text
