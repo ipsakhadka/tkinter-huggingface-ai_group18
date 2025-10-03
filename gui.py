@@ -71,20 +71,25 @@ class AIApp(tk.Tk):
         )
         self.model_dropdown.pack(pady=5)
 
-        # Confirm Button
+        # Confirm Button + Refresh button 
+        #adding the buttons side by side since the stack isn't looking good
+
+        button_frame = tk.Frame(self.run_tab)
+        button_frame.pack(pady=10)  # space above/below buttons 
+        
         self.confirm_button = tk.Button(
-            self.run_tab, text="Submit", font=("Arial", 12, "bold"),
+            button_frame, text="Submit", font=("Arial", 12, "bold"),
             bg="white", fg="blue", command=self.confirm_selection
         )
 
-        self.confirm_button.pack(pady=10)
+        self.confirm_button.pack(side="left", padx=5, pady=0)
 
          # ==== Refresh Button ====
         self.refresh_button = tk.Button(
-            self.run_tab, text="Refresh", font=("Arial", 12, "bold"),
-            bg="White", fg="green", command=self.refresh_selection
+            button_frame, text="Refresh", font=("Arial", 12, "bold"),
+            bg="white", fg="green", command=self.refresh_selection
         )
-        self.refresh_button.pack(pady=5)
+        self.refresh_button.pack(side="left", padx=5, pady=0)
 
         # Frame for input/output widgets
         self.io_frame = tk.Frame(self.run_tab)
