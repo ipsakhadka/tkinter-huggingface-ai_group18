@@ -3,6 +3,8 @@ from tkinter import ttk, scrolledtext
 from tkinter import filedialog, messagebox
 from models import AIModels
 import functools
+from PIL import Image, ImageTk
+
 
 #Decorator
 
@@ -43,6 +45,18 @@ class AIApp(tk.Tk):
         # Frame for tab
         self.run_tab = ttk.Frame(self.notebook)
         self.notebook.add(self.run_tab, text="Run Models")
+
+        #Let's add an image as a background for the GUI as shown in class
+         # ---------- Background Image ----------
+        bg_image_path = "data/syd_bg.jpg" # since the image is saved in the data folder herewithin
+        bg_img = Image.open(bg_image_path)
+        bg_img = bg_img.resize((800, 600))  # setting the size same as window size
+        self.bg_photo = ImageTk.PhotoImage(bg_img)
+
+        bg_label = tk.Label(self.run_tab, image=self.bg_photo)
+        bg_label.place(x=0, y=0, relwidth=1, relheight=1)
+
+
 
         # Input Type Selection 
         input_type_label = tk.Label(self.run_tab, text="Choose input type:", font=("Arial", 12))
@@ -92,7 +106,8 @@ class AIApp(tk.Tk):
         self.refresh_button.pack(side="left", padx=5, pady=0)
 
         # Frame for input/output widgets
-        self.io_frame = tk.Frame(self.run_tab)
+        self.io_frame = tk.Frame(self.run_tab, bg="light blue") # adding light blue to match closely with the background because..
+        #tkinter doesn't support transparency and this block was standing out, hence light blu 
         self.io_frame.pack(fill="both", expand=True, pady=10)
 
     # ======================
@@ -152,7 +167,7 @@ class AIApp(tk.Tk):
             ).pack(pady=10)
 
             tk.Label(self.io_frame, text="Model Output:", font=("Arial", 12, "bold")).pack(pady=5)
-            self.output_text = tk.Text(self.io_frame, height=6, width=60, state="disabled")
+            self.output_text = tk.Text(self.io_frame, height=6, width=50,bg="black", bd=0, highlightthickness=0)
             self.output_text.pack(pady=5)
             return
 
